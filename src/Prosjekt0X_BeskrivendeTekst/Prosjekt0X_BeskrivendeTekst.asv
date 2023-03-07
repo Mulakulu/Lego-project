@@ -23,7 +23,7 @@ clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = true;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'P00_meastest_2.mat';
+filename = 'P0X_MeasBeskrivendeTekst_Y.mat';
 %--------------------------------------------------------------------------
 
 
@@ -163,22 +163,18 @@ while ~JoyMainSwitch
 
 
     % Spesifisering av initialverdier og beregninger
-    a1=5;
-    a2=-5;
     if k==1
-        Nullflow = Lys(1)+2.84;
+        Nullflow = Lys(1);
         V(1) = 0.0;
         Ts(1) = 0.0;
         Flow(1) = 0;% nominell verdi
     else
-        %Flow(k)=a2;   
-        %definer nominell initialverdi for Ts
+              %definer nominell initialverdi for Ts
         Flow(k) = Lys(k)- Nullflow;
         %beregn Flow(k) som "Lys(k)-nullflow"
-        Ts(k) = Tid(k) - Tid(k-1);
+        Ts(k) = t(k) - t(k-1);
         %beregn tidsskrittet Ts(k)
-        V(k)= V(k-1)+Ts(k)*(Flow(k-1));
-        %V(k)=a2*Tid(k);
+        V(k)= V(k-1)+Ts*(Flow(k-1));
         %beregn Volum(k) vha Eulers forovermetode  % Beregninger av Ts og variable som avhenger av initialverdi
     end
 
@@ -227,19 +223,19 @@ while ~JoyMainSwitch
     xlabel('Tid [sek]')
 
     subplot(2,2,2)
-    plot(Tid(1:k),Flow(1:k));
-    title('Flow')
+    plot(Tid(1:k),Avstand(1:k));
+    title('Avstand')
     xlabel('Tid [sek]')
 
-    subplot(2,2,3)
-    plot(Tid(1:k),V(1:k));
-    title('Volum')
+    %subplot(2,2,3)
+    plot(Tid(1:k),VinkelPosMotorB(1:k));
+    title('Vinkelposisjon motor B')
     xlabel('Tid [sek]')
 
-    %subplot(2,2,4)
-    %plot(Tid(1:k),PowerB(1:k));
-    %title('Power B')
-    %xlabel('Tid [sek]')
+    subplot(2,2,4)
+    plot(Tid(1:k),PowerB(1:k));
+    title('Power B')
+    xlabel('Tid [sek]')
 
     % tegn nå (viktig kommando)
     drawnow
