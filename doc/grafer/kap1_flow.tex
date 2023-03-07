@@ -1,0 +1,107 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% KAPPITTEL 1: GRAF FLOW
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[../main]{subfiles}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Start av dokumentet
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\begin{figure}[H]
+    \centering
+
+    \pgfplotsset{
+        grid=major,
+        height=0.3\textwidth,
+        xmin=0,
+        xmax=12,
+        width=\linewidth,
+    }
+    \begin{tikzpicture}
+        % Plot 1
+        \begin{axis}[%
+                name=plot1,
+                ylabel={$u(t)$ [cl/s]},
+                xlabel={$t$ [s]},
+                ymin=-15,
+                ymax=25,
+            ]
+
+            % Plott strømningsdata fra .csv-fil
+            \addplot[%
+                name path=FLOW,
+                no marks,
+                color=blue,
+            ]
+            table[%
+                    x=t,
+                    y=f,
+                    col sep=comma
+                ]{\subfix{../../src/Prosjekt01_NumeriskIntegrasjon/data/Prosjekt01_NumeriskIntegrasjon_Konstant.csv}};
+
+            % Lag usynlige horisontal akse
+            \path [name path=AXIS]
+            (\pgfkeysvalueof{/pgfplots/xmin},0) --
+            (\pgfkeysvalueof{/pgfplots/xmax},0);
+
+            % Skraver areal mellom graf og akse
+            \addplot[solid, gray, opacity=0.25] fill between [of=FLOW and AXIS, soft clip={domain=1.7:4.4}];
+
+            % Legg til teskt for areal
+            \node [] at (3,10) {$A1$};
+
+            % Legg til piler
+            \draw[<->, black, dashed] (1.8,0) -- (4.4,0) node [pos=0.5,below] {$\Delta t = \SI{2.6}{s}$};
+            \draw[<->, black, dashed] (4.5,0) -- (4.5,20) node [pos=0.5,right] {$\Delta u = \SI{20}{cl/s}$};
+
+        \end{axis}
+
+        % Plot 2
+        \begin{axis}[
+                name=plot2,
+                at=(plot1.below south west), anchor=above north west,
+                ylabel={$y(t)$ [l]},
+                xlabel={$t$ [s]},
+                ymin=-5,
+                ymax=80,
+                domain=0:12,
+            ]
+            % Plott volumdata fra .csv-fil
+            \addplot[%
+                name path=VOLUME,
+                no marks,
+                color=blue
+            ]
+            table [%
+                    x=t,
+                    y=v,
+                    col sep=comma
+                ]
+                {\subfix{../../src/Prosjekt01_NumeriskIntegrasjon/data/Prosjekt01_NumeriskIntegrasjon_Konstant.csv}};
+
+            % Lag usynlig horisontal akse
+            \path [name path=AXIS]
+            (\pgfkeysvalueof{/pgfplots/xmin},20) --
+            (\pgfkeysvalueof{/pgfplots/xmax},20);
+
+            % Skraver areal mellom graf og akse
+            \addplot[solid, gray, opacity=0.25] fill between [of=VOLUME and AXIS, soft clip={domain=1.8:4.4}];
+
+            % Legg til teskt for areal
+            \node [] at (3.5,40) {$A2$};
+
+            % Legg til piler
+            \draw[<->, black, dashed] (1.9,20) -- (4.4,20) node [pos=0.5,below] {$\Delta t = \SI{2.6}{s}$};
+            \draw[<->, black, dashed] (4.4,20) -- (4.4,72) node [pos=0.5,right] {$\Delta y = \SI{52}{cl}$};
+
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Strømning $u(t)$ ved fylling og tapping av væske i glasset og forandring i volum $y(t)$ i glasset.}
+    \label{fig:kap1_flow}
+
+\end{figure}
+
+\end{document}

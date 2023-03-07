@@ -1,0 +1,194 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% HOVEDDOKUMENT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[11pt, a4paper, oneside]{report}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Pakker
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Språkpakker
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[norsk]{babel}
+
+% Mattepakker
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{siunitx}
+
+% Grafikkpakker
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% Miljøpakker
+\usepackage{enumerate}
+\usepackage{listings}
+\usepackage[framed, numbered]{matlab-prettifier}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{csquotes}
+
+% Dokumentpakker
+\usepackage{fancyhdr}
+\usepackage{fancyvrb}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{appendix}
+\usepackage[style=authoryear, backend=biber]{biblatex}
+
+% Tabellpakker
+\usepackage{booktabs}
+
+% Plottepakker
+\usepackage{pgfplots}
+
+% Tekstpakker
+\usepackage{todonotes}
+\usepackage{lipsum}
+
+% Andre pakker
+\usepackage{subfiles}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Konfigurasjon
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Definer norsk som språk
+\selectlanguage{norsk}
+
+% Definer grafikkstier
+\graphicspath{%
+    {bilder},
+    {figurer},
+}
+
+% Definer bibliografistier
+\addbibresource{\subfix{referanser.bib}}
+
+% Valg for undertekster til figurer og tabeller
+\captionsetup{
+    font=small,
+    labelfont=bf}
+
+% Valg for lenker
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdftitle={PROSJEKT - VÅREN 2023},
+    }
+
+% Valg for dokumentutforming
+\textwidth=135mm
+\textheight=195mm
+\setlength{\marginparwidth}{3cm}
+\setlength{\headheight}{14pt}
+
+% Valg for pgfplots-miljø
+\pgfplotsset{
+    compat=1.18,
+    label style={font=\footnotesize},
+    ticklabel style={font=\footnotesize},
+    }
+\usepgfplotslibrary{fillbetween}
+
+\makeatletter
+\providecommand\tikz@resetexpandcount{\tikz@expandcount=100\relax}
+\makeatother
+
+% Valg for listings-miljø
+\lstset{
+    literate=%
+    {æ}{{\ae}}1
+    {Æ}{{\AE}}1
+    {Ø}{{\O}}1
+    {ø}{{\o}}1
+    {å}{{\r a}}1
+    {Å}{{\r A}}1
+    }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Kommandoer
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\lstlistingname}{Kode}
+\renewcommand{\lstlistlistingname}{Liste av kode}
+
+\renewcommand{\chaptermark}[1]{\markboth{#1}{#1}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+\rhead{}
+\chead{}
+\cfoot{\bfseries\thepage}
+\lfoot{}
+\rfoot{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Start av dokumentet
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Frontmatter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Importer forside
+\subfile{forside.tex}
+\newpage
+
+% Romerk numbering av frontmatter
+\pagenumbering{roman}
+
+% Innholdsfortegnelsen
+\addcontentsline{toc}{chapter}{\protect\numberline{}Innhold}
+\tableofcontents
+\newpage
+
+% Importer sammendrag
+\subfile{sammendrag.tex}
+\newpage
+
+% Siden sammendraget er uten kapittelnummer, legges dette manuelt inn
+% i innholdsfortegnelsen
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Mainmatter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Romerk numbering av mainmatter
+\pagenumbering{arabic}
+
+% Definere sidehoder og -føtter
+\pagestyle{fancyplain}
+
+% Importer kapitler og konklusjon
+\subfile{kap1_integrasjon.tex}
+\subfile{kap2_filtrering.tex}
+\subfile{kap3_derivasjon.tex}
+\subfile{kap4_manuell_kjoring.tex}
+\subfile{konklusjon.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Backmatter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Importer bibliografi
+\printbibliography
+\addcontentsline{toc}{chapter}{Bibliografi}
+\newpage
+
+% Start vedlegg
+\appendix
+
+% Konfigurer overskrift for vedlegg
+\addcontentsline{toc}{chapter}{Vedlegg}
+\subfile{vedlegg_timelister.tex}
+
+\end{document}
+
+

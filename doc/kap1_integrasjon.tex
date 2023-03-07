@@ -1,0 +1,80 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% KAPPITTEL 1: NUMERISK INTEGRASJON
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[main.tex]{subfiles}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Start av dokumentet
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\chapter{Numerisk integrasjon (utført av hele gruppen) }\label{kap:integrasjon}
+
+\section{Problemstilling}
+Gruppen ønsker å vise at måledata fra \textsc{EV3}-roboten kan numerisk integreres ved bruk av \textsc{MATLAB}.
+
+\section{Numerisk integrasjon}
+Numerisk integrasjon er en metode for å estimere et bestemt integral når integranden er en serie med diskrete verdier. Diskrete verdier er ikke kontinuerlige, og derfor kan man ikke benytte analytisk integrasjon.
+
+Metoden bygger på at integranden $f(x)$ i utganspunktet er en serie med diskrete verdier. Ved å kalkulere arealet under $f(x)$ for hvert intervall serien og summere disse er det mulig å estimere det bestemte integralet \parencite[s. 297–301]{AdaEss2017}. Et estimat for arealet under integranden $f(x)$ kan da skrives som
+
+\begin{equation}\label{eq:kap1_sum_area}
+    \hat{A} =\sum_{k=1}^{n-1} \, f(x_k) \cdot \Delta x_k
+\end{equation}
+
+hvor $\Delta x_k$ er lengden på intervallet mellom to målinger og $x_k$ er verdiene til integranden ved de respektive målingene. Figur~\ref{fig:kap1_partitioning} viser utrykket i \eqref{eq:kap1_sum_area} plottet mot funksjonen $f$.
+
+Arealet under $f(x)$ på et intervall i serien kan estimeres blant annet ved å bruke rektangler eller trapeser.
+
+\subfile{./figurer/kap1_partitioning.tex}
+
+For å kunne benytte utrykket i \eqref{eq:kap1_sum_area} i \textsc{MATLAB} må den skrives på rekursiv form \parencite[s.~53–58]{Dre2023Simulink}. Vi har i denne oppgaven valgt å benytte Euler's forovermetode. Denne metoden kan skrives som
+
+\begin{equation}\label{eq:kap1_area_rec}
+    y_k = y_{k-1} + \Delta{x_k} \cdot f(x_{k-1}) \quad \forall k=2,..., n
+\end{equation}
+
+Grunnen til at vi har valgt å benytte Euler's forovermetode at metoden gir et estimat på arealet under integranden på gjeldende intervall gitt verdien av arealet og integranden ved forrige intervall. Dette er ønskelig utifra at vi ønsker å kalkulere gjeldende areal hurtig, og at vi kun må lagre ett areal for å kunne estimere arealet på neste intervall.
+
+En generell implementering av utrykket i \eqref{eq:kap1_area_rec} i \textsc{MATLAB} kan sees i Kode~\ref{lst:kap1_euler}. Legg merke til at en initialverdi for $y(1)$ må settes på linje 3 for å kunne estimere arealet på det første intervallet.
+
+\subfile{./kode/kap1_euler_forward.tex}
+
+\section{Implentering av numerisk integrasjon i \textsc{MATLAB}}
+For å verifisere at Euler's forovermetode kan brukes til å integrere diskrete måledata i \textsc{MATLAB} har vi benyttet to forsøk. Begge forsøkene er basert på å hente måledata fra lyssensoren til \textsc{EV3}-roboten og så numerisk integrere måledataen. For å verifisere at implementeringen vår i \textsc{MATLAB} er riktig har vi sammenlignet resultatene fra numerisk integrasjon med analytiske verdier.
+
+\subsection{Integrasjon av en konstant}
+Dette forsøket simulerer fylling og tapping av væske i et glass. Se Figur~\ref{fig:kap1_skisse_glass} for en konseptuell skisse av forsøket.
+
+\subfile{./figurer/kap1_skisse_glass.tex}
+
+Fylling av glasset gjennom kranen og tapping ut av sugerøret blir simulert ved å lese av reflektert lys fra en gråskalastripe. Gråskalastripen kan sees i Figur~\ref{fig:kap1_skala}.
+
+\subfile{./figurer/kap1_skala.tex}
+
+Lysmåleren til \textsc{EV3}-roboten blir plasert på gråskalafeltet med metning 50\% i midten av stripen. Når programmet i \textsc{MATLAB} som simulerer fylling og tapping blir startet blir den første lysmålingen fra lyssensoren satt at strømningen i glasset er $u(0) = \SI{0}{cl/s}$. Ved å flytte lysmåleren til høyre for startfeltet på gråskalastripen vil strømningsraten bli positiv, og ved å sette lysmåleren til venstre for startfeltet vil strømningsraten bli negativ.
+
+For å simulere volumet av væske i glasset når det tappes og fylles integreres måledataene fra lysmåleren. Dette gjøres ved å bruke uttrykket i \eqref{eq:kap1_area_rec} og følgende implementering av Kode~\ref{lst:kap1_euler}.
+
+\subfile{./kode/kap1_integrasjon_glass.tex}
+
+I Figur~\ref{fig:kap1_flow} er måledataene fra forsøket plottet sammen med resultatene fra numerisk integrasjon.
+
+\subfile{./grafer/kap1_flow.tex}
+
+For å kontrollere at implementeringen av Euler's fremovermetode korrekt, kan vi sammenligne måledataene med et analytisk integral av en konstant. Ved å integrere $u(t)$ fra $t = \SI{1.8}{s}$ til $t = \SI{4.4}{s}$ så skal integralet $I$ tilsvare økningen av volum $\Delta y$ i glasset.
+
+\begin{align}
+    I & = \int_{1.8}^{4.4} \Delta u \, dt \nonumber         \\
+      & = \Delta u_1 \cdot t \, \Big|_{1.8}^{4.4} \nonumber \\
+      & = \Delta u_1 \cdot (4.4 - 1.8) \nonumber            \\
+      & = \SI{52}{cl}
+\end{align}
+
+Noe som betyr at $I = \Delta y = \SI{52}{cl}$ og at implementeringen er korrekt.
+
+\subsection{Integrasjon av et sinussignal}
+
+\end{document}

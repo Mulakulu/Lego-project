@@ -1,0 +1,31 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% KAPPITTEL 1: KODE EULER FORWARD
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[../main.tex]{subfiles}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Start av dokumentet
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\begin{minipage}{\textwidth}
+
+    \begin{lstlisting}[%
+    style=Matlab-editor,
+    basicstyle=\footnotesize,
+    caption={Generell implementering av Euler's forovermetode i \textsc{MATLAB}.}
+    ]
+for k = 1 : n
+    if k == 1
+        y(k) = 0;
+    else
+        y(k) = y(k-1) + delta_x * f(k-1);
+    end
+end
+\end{lstlisting}\label{lst:kap1_euler}
+
+\end{minipage}
+
+\end{document}
