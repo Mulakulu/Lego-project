@@ -246,7 +246,7 @@ while ~JoyMainSwitch
 
     subplot(2,2,4)
     plot(Tid(1:k),Smooth(1:k));
-    title(['IRR Smooth with factor: ',num2str(b0,4)])
+    title(['IIR Smooth with factor: ',num2str(b0,4)])
     xlabel('Tid [sek]')
 
     %subplot(2,2,4)
