@@ -23,7 +23,7 @@ clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = false;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'Del_2_chirp.mat';
+filename = 'P00_MeasTest_1_RaskSinus.mat';
 %--------------------------------------------------------------------------
 
 
@@ -165,24 +165,23 @@ while ~JoyMainSwitch
     % Spesifisering av initialverdier og beregninger
     a1=5;
     a2=-5;
-    meanFlow = 3.75;
+    meanFlow = 4.5;
     if k==1
         Nullflow = Lys(1);
-        V(1) = 0.0;
+        V(1) = 7;
         Ts(1) = 0.0;
-        Flow(1) = -meanFlow; %Del 2
-        %Flow(1) = 0;% nominell verdi
+        %Flow(1) = -meanFlow; %Del 2
+        Flow(1) = 0;% nominell verdi
     else
         %Flow(k)=a2;   
         %definer nominell initialverdi for Ts
-        %Flow(k) = Lys(k)- Nullflow
-        Flow(k) = Lys(k)- Nullflow - meanFlow; %Del 2
+        Flow(k) = Lys(k)- Nullflow;
+        %Flow(k) = Lys(k)- Nullflow - meanFlow; %Del 2
         %beregn Flow(k) som "Lys(k)-nullflow"
         Ts(k) = Tid(k) - Tid(k-1);
         %beregn tidsskrittet Ts(k)
         V(k)= V(k-1)+Ts(k)*(Flow(k-1));
         %V(k)=a2*Tid(k);
-        %beregn Volum(k) vha Eulers forovermetode  % Beregninger av Ts og variable som avhenger av initialverdi
     end
 
     % Andre beregninger som ikke avhenger av initialverdi

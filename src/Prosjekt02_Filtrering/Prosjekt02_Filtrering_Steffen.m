@@ -23,10 +23,7 @@ clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = false;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'P00_MeasTest_1_TregSinus.mat';
-% Definer variabler
-b0 = 0.5; %Hvor mye effekt ny data har på verdien i prosent
-Flowmean = 0.8670; %Beregnet mean(Flow)
+filename = 'P00_MeasTest_1_RaskSinus.mat';
 %--------------------------------------------------------------------------
 
 
@@ -41,6 +38,7 @@ Flowmean = 0.8670; %Beregnet mean(Flow)
 % Eksempel:
 % mySonicSensor_1 = sonicSensor(mylego,3);
 % mySonicSensor_2 = sonicSensor(mylego,4);
+
 % For ryddig og oversiktlig kode, kan det være lurt å slette
 % de sensorene og motoren som ikke brukes. 
 
@@ -167,21 +165,23 @@ while ~JoyMainSwitch
     % Spesifisering av initialverdier og beregninger
     a1=5;
     a2=-5;
+    meanFlow = 4.5;
     if k==1
-        Nullflow = Lys(1)+2.84;
-        V(1) = 0.0;
+        Nullflow = Lys(1);
+        V(1) = 7;
         Ts(1) = 0.0;
-        Flow(1) = -Flowmean;% nominell verdi
+        %Flow(1) = -meanFlow; %Del 2
+        Flow(1) = 0;% nominell verdi
     else
         %Flow(k)=a2;   
         %definer nominell initialverdi for Ts
-        Flow(k) = Lys(k)- Nullflow-Flowmean;
+        Flow(k) = Lys(k)- Nullflow;
+        %Flow(k) = Lys(k)- Nullflow - meanFlow; %Del 2
         %beregn Flow(k) som "Lys(k)-nullflow"
         Ts(k) = Tid(k) - Tid(k-1);
         %beregn tidsskrittet Ts(k)
         V(k)= V(k-1)+Ts(k)*(Flow(k-1));
         %V(k)=a2*Tid(k);
-        %beregn Volum(k) vha Eulers forovermetode  % Beregninger av Ts og variable som avhenger av initialverdi
     end
 
     % Andre beregninger som ikke avhenger av initialverdi
@@ -238,21 +238,27 @@ while ~JoyMainSwitch
     title('Volum')
     xlabel('Tid [sek]')
     
-    if k~=1
-        Smooth(k) = (1-b0)*Smooth(k-1)+b0*Flow(k);
+    alfa = 0.5;
+    if k ~= 1
+        Temp_IIR(k) = (1-alfa) * Temp_IIR(k-1) + alfa * Flow(k);
     else
-        Smooth(1) = Flow(1);
+        Temp_IIR(1) = Flow(1);
     end
-
+ 
     subplot(2,2,4)
-    plot(Tid(1:k),Smooth(1:k));
-    title(['IIR Smooth with factor: ',num2str(b0,4)])
+    plot(Tid(1:k),Temp(1:k));
+    title('Power B')
     xlabel('Tid [sek]')
 
-    %subplot(2,2,4)
-    %plot(Tid(1:k),PowerB(1:k));
-    %title('Power B')
-    %xlabel('Tid [sek]')
+    subplot(2,2,5)
+    plot(Tid(1:k),Temp_FIR(1:k));
+    title('Power B')
+    xlabel('Tid [sek]')
+
+    subplot(2,2,6)
+    plot(Tid(1:k),Temp_IIR(1:k));
+    title('Power B')
+    xlabel('Tid [sek]')
 
     % tegn nå (viktig kommando)
     drawnow
@@ -290,7 +296,6 @@ while not skyteknapp
 plot Flow i øverste subplot
 plot Volum i nederste subplot
 end
-
 
 
 
