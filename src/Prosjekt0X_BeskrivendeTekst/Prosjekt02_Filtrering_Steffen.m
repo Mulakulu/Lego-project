@@ -23,7 +23,7 @@ clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = false;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'P00_MeasTest_1_TregSinus.mat';
+filename = 'P00_MeasTest_1_RaskSinus.mat';
 %--------------------------------------------------------------------------
 
 
@@ -238,16 +238,26 @@ while ~JoyMainSwitch
     %title('Volum')
     %xlabel('Tid [sek]')
     
-    alfa = 0.05;
-    if k ~= 1
-        Temp_IIR(k) = (1-alfa) * Temp_IIR(k-1) + alfa * Flow(k);
+    alfa = 0.25;
+    %if k ~= 1
+        %Temp_IIR(k) = (1-alfa) * Temp_IIR(k-1) + alfa * Flow(k);
         
-    else
-        Temp_IIR(1) = Flow(1);
+    %else
+        %Temp_IIR(1) = Flow(1);
+    %end
+    
+    M=50;
+    n=1;
+    for k = 2:M
+        Temp_FIR(k) = 1/M*(Temp_FIR(k-n));
     end
+
+
+
+    
  
     subplot(2,2,4)
-    plot(Tid(1:k),Temp_IIR(1:k));
+    plot(Tid(1:k),Temp_FIR(1:k));
     title('Flow filtrert med faktor: ', alfa)
     xlabel('Tid [sek]')
 
