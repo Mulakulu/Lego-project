@@ -112,6 +112,7 @@ while ~JoyMainSwitch
 
         % sensorer (bruk ikke Lys(k) og LysDirekte(k) samtidig)
         Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+        Avstand(k) = double(readDistance(mySonicSensor));
 
         %{
         LysDirekte(k) = double(readLightIntensity(myColorSensor));
@@ -160,9 +161,9 @@ while ~JoyMainSwitch
     % Parametre
     b0=0.5;
     %a=0.7;
-    Avstand(k) = Lys(k);
+    %Avstand(k) = Lys(k);
     % Tilordne målinger til variabler
-
+     Avstand(k) = double(readDistance(mySonicSensor));
     % Spesifisering av initialverdier og beregninger
    % a1=5;
    % a2=-5;
@@ -188,6 +189,7 @@ while ~JoyMainSwitch
             %w(k-1));
         %V(k)=a2*Tid(k);
         %beregn Volum(k) vha Eulers forovermetode  % Beregninger av Ts og variable som avhenger av initialverdi
+   
     end
 
     % Andre beregninger som ikke avhenger av initialverdi
