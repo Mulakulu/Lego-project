@@ -238,6 +238,8 @@ while ~JoyMainSwitch
     %title('Volum')
     %xlabel('Tid [sek]')
     
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    %                   IIR-filter
     alfa = 0.25;
     %if k ~= 1
         %Temp_IIR(k) = (1-alfa) * Temp_IIR(k-1) + alfa * Flow(k);
@@ -246,13 +248,23 @@ while ~JoyMainSwitch
         %Temp_IIR(1) = Flow(1);
     %end
     
-    M=50;
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    %                   FIR-filter
+    M=5;
     n=1;
-    for k = 2:M
-        Temp_FIR(k) = 1/M*(Temp_FIR(k-n));
+    %Temp_FIR(k) = Lys(k);
+    if k == 1
+        Temp_FIR(k) = Lys(k);
     end
 
+    if k < M
+        M=k;
+    end
+        Temp_FIR(k) = 1/M*sum(Lys(k-M+1:k));
 
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     
  
