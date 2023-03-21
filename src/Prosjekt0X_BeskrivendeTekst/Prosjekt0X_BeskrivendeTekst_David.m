@@ -27,8 +27,25 @@ filename = 'P00_meastest_2.mat';
 % Definer variabler
 b0 = 0.5; %Hvor mye effekt ny data har på verdien i prosent
 Flowmean = 0.8670; %Beregnet mean(Flow)
+lookback = 5; %Definerer hvor mye FIR filtered ser tilbake
 %--------------------------------------------------------------------------
 
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%                DEFINE THE ALFAS OF THE FIR INPUTS
+%   1 = moving average  (1*(k-2)+1*(k-1)+1*(k))/3  <-sum of alphas
+%   2 = slope           (1*(k-2)+2*(k-1)+3*(k))/6  <-sum of alphas
+%   3 = exponent        (1*(k-2)+4*(k-1)+9*(k))/14 <-sum of alphas
+spreadtype = 2;
+switch spreadtype
+    case 1
+        alfas(1:lookback) = 1/sum(lookback)
+    case 2
+        alfas(1:lookback) = (1:lookback)/sum(1:lookback)
+    case 3
+        alfas(1:lookback) = (power(1:lookback,2))/sum(power(1:lookback,2))
+    otherwise
+end
+%--------------------------------------------------------------------------
 
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                      INITIALIZE EQUIPMENT
@@ -239,15 +256,18 @@ while ~JoyMainSwitch
     xlabel('Tid [sek]')
     
     if k~=1
-        Smooth(k) = (1-b0)*Smooth(k-1)+b0*Flow(k);
+        IIR(k) = (1-b0)*IIR(k-1)+b0*Flow(k);
     else
-        Smooth(1) = Flow(1);
+        IIR(1) = Flow(1);
     end
 
     subplot(2,2,4)
-    plot(Tid(1:k),Smooth(1:k));
+    plot(Tid(1:k),IIR(1:k));
     title(['IIR Smooth with factor: ',num2str(b0,4)])
     xlabel('Tid [sek]')
+    
+    if k < lookback
+    end
 
     %subplot(2,2,4)
     %plot(Tid(1:k),PowerB(1:k));
@@ -264,8 +284,8 @@ while ~JoyMainSwitch
     %
     % Oppdaterer tellevariabel
     k=k+1;
-end
 
+end
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %               STOP MOTORS
 
