@@ -21,9 +21,9 @@
 % Alltid lurt å rydde workspace opp først
 clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
-online = false;
+online = true;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'P00_MeasTest_1_TregSinus.mat';
+filename = 'Filtering_logging_1.mat';
 %--------------------------------------------------------------------------
 
 
@@ -78,6 +78,25 @@ disp('Equipment initialized.')
 %----------------------------------------------------------------------
 
 
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%                DEFINE THE ALFAS OF THE FIR INPUTS
+%   1 = moving average  (1*(k-2)+1*(k-1)+1*(k))/3  <-sum of alphas
+%   2 = slope           (1*(k-2)+2*(k-1)+3*(k))/6  <-sum of alphas
+%   3 = exponent        (1*(k-2)+4*(k-1)+9*(k))/14 <-sum of alphas
+%lookback = 5; %Definerer hvor mye FIR filtered ser tilbake
+%spreadtype = 2;
+%switch spreadtype
+    %case 1
+        %alfas(1:lookback) = 1/sum(lookback)
+    %case 2
+        %alfas(1:lookback) = (1:lookback)/sum(1:lookback)
+    %case 3
+        %alfas(1:lookback) = (power(1:lookback,2))/sum(power(1:lookback,2))
+    %otherwise
+%end
+%--------------------------------------------------------------------------
+
+
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                       SPECIFY FIGURE SIZE
 fig1=figure;
@@ -94,6 +113,7 @@ JoyMainSwitch=0;
 k=1;
 
 while ~JoyMainSwitch
+    pause(0.5)
     %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                       GET TIME AND MEASUREMENT
     % Få tid og målinger fra sensorer, motorer og joystick
@@ -207,7 +227,7 @@ while ~JoyMainSwitch
     end
     %--------------------------------------------------------------
 
-
+    
 
 
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -240,7 +260,7 @@ while ~JoyMainSwitch
     
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                   IIR-filter
-    alfa = 0.25;
+    alfa = 0.6;
     if k ~= 1
         Temp_IIR(k) = (1-alfa) * Temp_IIR(k-1) + alfa * Flow(k);
         
@@ -252,7 +272,7 @@ while ~JoyMainSwitch
     
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                   FIR-filter
-    M=25; %Antall målinger
+    M=3; %Antall målinger
     %Temp_FIR(k) = Lys(k);
     if k == 1
         Temp_FIR(k) = Lys(k);
