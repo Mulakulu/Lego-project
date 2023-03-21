@@ -111,8 +111,8 @@ while ~JoyMainSwitch
         end
 
         % sensorer (bruk ikke Lys(k) og LysDirekte(k) samtidig)
-        Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
-        Avstand(k) = double(readDistance(mySonicSensor));
+       % Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+       % Avstand(k) = double(readDistance(mySonicSensor));
 
         %{
         LysDirekte(k) = double(readLightIntensity(myColorSensor));
@@ -163,7 +163,7 @@ while ~JoyMainSwitch
     %a=0.7;
     %Avstand(k) = Lys(k);
     % Tilordne målinger til variabler
-     Avstand(k) = double(readDistance(mySonicSensor));
+     %Avstand(k) = double(readDistance(mySonicSensor));
     % Spesifisering av initialverdier og beregninger
    % a1=5;
    % a2=-5;

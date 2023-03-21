@@ -298,6 +298,8 @@ if online
     stop(motorD);
 
 end
+
+
 %------------------------------------------------------------------
 while not skyteknapp
 % GET TIME AND MEASUREMENT
@@ -307,8 +309,8 @@ while not skyteknapp
 
 
 % PLOT DATA
-plot Flow i øverste subplot
-plot Volum i nederste subplot
+%plot Flow i øverste subplot
+%plot Volum i nederste subplot
 end
 
 
