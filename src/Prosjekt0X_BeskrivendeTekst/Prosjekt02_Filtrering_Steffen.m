@@ -24,28 +24,8 @@ clear; close all
 online = false;
 % Spesifiser et beskrivende filnavn for lagring av måledata
 filename = 'P00_MeasTest_1_TregSinus.mat';
-% Definer variabler
-b0 = 0.5; %Hvor mye effekt ny data har på verdien i prosent
-Flowmean = 0.8670; %Beregnet mean(Flow)
-lookback = 5; %Definerer hvor mye FIR filtered ser tilbake
 %--------------------------------------------------------------------------
 
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-%                DEFINE THE ALFAS OF THE FIR INPUTS
-%   1 = moving average  (1*(k-2)+1*(k-1)+1*(k))/3  <-sum of alphas
-%   2 = slope           (1*(k-2)+2*(k-1)+3*(k))/6  <-sum of alphas
-%   3 = exponent        (1*(k-2)+4*(k-1)+9*(k))/14 <-sum of alphas
-spreadtype = 2;
-switch spreadtype
-    case 1
-        alfas(1:lookback) = 1/sum(lookback)
-    case 2
-        alfas(1:lookback) = (1:lookback)/sum(1:lookback)
-    case 3
-        alfas(1:lookback) = (power(1:lookback,2))/sum(power(1:lookback,2))
-    otherwise
-end
-%--------------------------------------------------------------------------
 
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                      INITIALIZE EQUIPMENT
@@ -58,6 +38,7 @@ end
 % Eksempel:
 % mySonicSensor_1 = sonicSensor(mylego,3);
 % mySonicSensor_2 = sonicSensor(mylego,4);
+
 % For ryddig og oversiktlig kode, kan det være lurt å slette
 % de sensorene og motoren som ikke brukes. 
 
@@ -184,21 +165,23 @@ while ~JoyMainSwitch
     % Spesifisering av initialverdier og beregninger
     a1=5;
     a2=-5;
+    meanFlow = 4.5;
     if k==1
-        Nullflow = Lys(1)+2.84;
-        V(1) = 0.0;
+        Nullflow = Lys(1);
+        V(1) = 7;
         Ts(1) = 0.0;
-        Flow(1) = -Flowmean;% nominell verdi
+        %Flow(1) = -meanFlow; %Del 2
+        Flow(1) = 0;% nominell verdi
     else
         %Flow(k)=a2;   
         %definer nominell initialverdi for Ts
-        Flow(k) = Lys(k)- Nullflow-Flowmean;
+        Flow(k) = Lys(k)- Nullflow;
+        %Flow(k) = Lys(k)- Nullflow - meanFlow; %Del 2
         %beregn Flow(k) som "Lys(k)-nullflow"
         Ts(k) = Tid(k) - Tid(k-1);
         %beregn tidsskrittet Ts(k)
         V(k)= V(k-1)+Ts(k)*(Flow(k-1));
         %V(k)=a2*Tid(k);
-        %beregn Volum(k) vha Eulers forovermetode  % Beregninger av Ts og variable som avhenger av initialverdi
     end
 
     % Andre beregninger som ikke avhenger av initialverdi
@@ -240,37 +223,67 @@ while ~JoyMainSwitch
     % aktiver fig1
     figure(fig1)
 
-    subplot(2,2,1)
-    plot(Tid(1:k),Lys(1:k));
-    title('Lys reflektert')
-    xlabel('Tid [sek]')
+    %subplot(2,2,1)
+    %plot(Tid(1:k),Lys(1:k));
+    %title('Lys reflektert')
+    %xlabel('Tid [sek]')
 
     subplot(2,2,2)
     plot(Tid(1:k),Flow(1:k));
     title('Flow')
     xlabel('Tid [sek]')
 
-    subplot(2,2,3)
-    plot(Tid(1:k),V(1:k));
-    title('Volum')
-    xlabel('Tid [sek]')
+    %subplot(2,2,3)
+    %plot(Tid(1:k),V(1:k));
+    %title('Volum')
+    %xlabel('Tid [sek]')
     
-    if k~=1
-        IIR(k) = (1-b0)*IIR(k-1)+b0*Flow(k);
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    %                   IIR-filter
+    alfa = 0.25;
+    if k ~= 1
+        Temp_IIR(k) = (1-alfa) * Temp_IIR(k-1) + alfa * Flow(k);
+        
     else
-        IIR(1) = Flow(1);
+        Temp_IIR(1) = Flow(1);
     end
-
-    subplot(2,2,4)
-    plot(Tid(1:k),IIR(1:k));
-    title(['IIR Smooth with factor: ',num2str(b0,4)])
-    xlabel('Tid [sek]')
     
-    if k < lookback
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    %                   FIR-filter
+    M=25; %Antall målinger
+    %Temp_FIR(k) = Lys(k);
+    if k == 1
+        Temp_FIR(k) = Lys(k);
     end
 
-    %subplot(2,2,4)
-    %plot(Tid(1:k),PowerB(1:k));
+    if k < M
+        M=k;
+    end
+        Temp_FIR(k) = 1/M*sum(Lys(k-M+1:k));
+
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    
+ 
+    subplot(2,2,4)
+    plot(Tid(1:k),Temp_IIR(1:k));
+    title('(IIR)Flow filtrert med faktor: ', alfa)
+    xlabel('Tid [sek]')
+
+    subplot(2,2,1)
+    plot(Tid(1:k),Temp_FIR(1:k));
+    title('(FIR)Flow filtrert med faktor: ', M)
+    xlabel('Tid [sek]')
+
+    %subplot(2,2,5)
+    %plot(Tid(1:k),Temp_FIR(1:k));
+    %title('Power B')
+    %xlabel('Tid [sek]')
+
+    %subplot(2,2,6)
+    %plot(Tid(1:k),Temp_IIR(1:k));
     %title('Power B')
     %xlabel('Tid [sek]')
 
@@ -284,8 +297,8 @@ while ~JoyMainSwitch
     %
     % Oppdaterer tellevariabel
     k=k+1;
-
 end
+
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %               STOP MOTORS
 
@@ -310,7 +323,6 @@ while not skyteknapp
 plot Flow i øverste subplot
 plot Volum i nederste subplot
 end
-
 
 
 

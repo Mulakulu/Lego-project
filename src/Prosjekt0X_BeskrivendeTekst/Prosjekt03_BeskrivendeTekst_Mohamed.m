@@ -23,29 +23,12 @@ clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = false;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'P00_MeasTest_1_TregSinus.mat';
+filename = 'kjapp_sin.mat';
 % Definer variabler
 b0 = 0.5; %Hvor mye effekt ny data har på verdien i prosent
 Flowmean = 0.8670; %Beregnet mean(Flow)
-lookback = 5; %Definerer hvor mye FIR filtered ser tilbake
 %--------------------------------------------------------------------------
 
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-%                DEFINE THE ALFAS OF THE FIR INPUTS
-%   1 = moving average  (1*(k-2)+1*(k-1)+1*(k))/3  <-sum of alphas
-%   2 = slope           (1*(k-2)+2*(k-1)+3*(k))/6  <-sum of alphas
-%   3 = exponent        (1*(k-2)+4*(k-1)+9*(k))/14 <-sum of alphas
-spreadtype = 2;
-switch spreadtype
-    case 1
-        alfas(1:lookback) = 1/sum(lookback)
-    case 2
-        alfas(1:lookback) = (1:lookback)/sum(1:lookback)
-    case 3
-        alfas(1:lookback) = (power(1:lookback,2))/sum(power(1:lookback,2))
-    otherwise
-end
-%--------------------------------------------------------------------------
 
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                      INITIALIZE EQUIPMENT
@@ -119,7 +102,6 @@ while ~JoyMainSwitch
     %
     % For ryddig og oversiktlig kode, kan det være lurt å slette
     % de sensorene og motoren som ikke brukes.
-
     if online
         if k==1
             tic
@@ -130,6 +112,7 @@ while ~JoyMainSwitch
 
         % sensorer (bruk ikke Lys(k) og LysDirekte(k) samtidig)
         Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+        Avstand(k) = double(readDistance(mySonicSensor));
 
         %{
         LysDirekte(k) = double(readLightIntensity(myColorSensor));
@@ -176,29 +159,37 @@ while ~JoyMainSwitch
     % Kaller IKKE på en funksjon slik som i Python.
 
     % Parametre
-    a=0.7;
-
+    b0=0.5;
+    %a=0.7;
+    %Avstand(k) = Lys(k);
     % Tilordne målinger til variabler
-
-
+     Avstand(k) = double(readDistance(mySonicSensor));
     % Spesifisering av initialverdier og beregninger
-    a1=5;
-    a2=-5;
+   % a1=5;
+   % a2=-5;
     if k==1
-        Nullflow = Lys(1)+2.84;
-        V(1) = 0.0;
+        AvstandIIR(1)=Avstand(k);
+       % Nullflow = Lys(1)+2.84;
+       % V(1) = 0.0;
         Ts(1) = 0.0;
-        Flow(1) = -Flowmean;% nominell verdi
+        Fart(1)=0;
+        FartIIR(1)=0;
+       % Flow(1) = -Flowmean;% nominell verdi
     else
+        AvstandIIR(k)= b0*Avstand(k)+(1-b0)*(AvstandIIR(k-1));
+        Fart(k) = (Avstand(k)-Avstand(k-1))/Ts(k);
+        FartIIR(k) = (AvstandIIR(k)-AvstandIIR(k-1))/Ts(k);
         %Flow(k)=a2;   
         %definer nominell initialverdi for Ts
-        Flow(k) = Lys(k)- Nullflow-Flowmean;
+        %Flow(k) = Lys(k)- Nullflow-Flowmean;
         %beregn Flow(k) som "Lys(k)-nullflow"
         Ts(k) = Tid(k) - Tid(k-1);
         %beregn tidsskrittet Ts(k)
-        V(k)= V(k-1)+Ts(k)*(Flow(k-1));
+       % V(k)= V(k-1)+Ts(k)*(Flo ...);
+            %w(k-1));
         %V(k)=a2*Tid(k);
         %beregn Volum(k) vha Eulers forovermetode  % Beregninger av Ts og variable som avhenger av initialverdi
+   
     end
 
     % Andre beregninger som ikke avhenger av initialverdi
@@ -245,29 +236,46 @@ while ~JoyMainSwitch
     title('Lys reflektert')
     xlabel('Tid [sek]')
 
+    %subplot(2,2,2)
+    %plot(Tid(1:k),Flow(1:k));
+    %title('Flow')
+    %xlabel('Tid [sek]')
+
+   % subplot(2,2,3)
+   % plot(Tid(1:k),V(1:k));
+   % title('Volum')
+   % xlabel('Tid [sek]')
+
     subplot(2,2,2)
-    plot(Tid(1:k),Flow(1:k));
-    title('Flow')
+    plot(Tid(1:k),Fart(1:k));
+    title('Fart')
     xlabel('Tid [sek]')
 
     subplot(2,2,3)
-    plot(Tid(1:k),V(1:k));
-    title('Volum')
+    plot(Tid(1:k),FartIIR(1:k));
+    title('FartIIR')
     xlabel('Tid [sek]')
-    
-    if k~=1
-        IIR(k) = (1-b0)*IIR(k-1)+b0*Flow(k);
-    else
-        IIR(1) = Flow(1);
-    end
 
     subplot(2,2,4)
-    plot(Tid(1:k),IIR(1:k));
-    title(['IIR Smooth with factor: ',num2str(b0,4)])
+    plot(Tid(1:k),Avstand(1:k));
+    plot(Tid(1:k),AvstandIIR(1:k))
+    title('Avstand')
     xlabel('Tid [sek]')
     
-    if k < lookback
+    
+    if k~=1
+      Smooth(k) = (1-b0)*Smooth(k-1)+b0*Lys(k);
+    else
+        Smooth(1) = Lys(1);
     end
+   
+   
+
+    subplot(2,2,4)
+    plot(Tid(1:k),Smooth(1:k));
+    title(['IIR Smooth with factor: ',num2str(b0,4)])
+    xlabel('Tid [sek]')
+
 
     %subplot(2,2,4)
     %plot(Tid(1:k),PowerB(1:k));
@@ -284,32 +292,23 @@ while ~JoyMainSwitch
     %
     % Oppdaterer tellevariabel
     k=k+1;
-
 end
+
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %               STOP MOTORS
 
 if online
     % For ryddig og oversiktlig kode, kan det være lurt å slette
     % de sensorene og motoren som ikke brukes.
-    stop(motorA);
-    stop(motorB);
-    stop(motorC);
-    stop(motorD);
+    %stop(motorA);
+    %stop(motorB);
+    %stop(motorC);
+    %stop(motorD);
 
 end
+
+
 %------------------------------------------------------------------
-while not skyteknapp
-% GET TIME AND MEASUREMENT
-
-% CONDITIONS, CALCULATIONS AND SET MOTOR POWER
-
-
-
-% PLOT DATA
-plot Flow i øverste subplot
-plot Volum i nederste subplot
-end
 
 
 
