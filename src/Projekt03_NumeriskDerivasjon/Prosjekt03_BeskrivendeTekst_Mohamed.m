@@ -23,9 +23,9 @@ clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = false;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'kjapp_sin.mat';
+filename = 'P00_MeasTest_1_RaskSinus.mat';
 % Definer variabler
-b0 = 0.5; %Hvor mye effekt ny data har på verdien i prosent
+alfa = 0.2; %Hvor mye effekt ny data har på verdien i prosent
 Flowmean = 0.8670; %Beregnet mean(Flow)
 %--------------------------------------------------------------------------
 
@@ -111,7 +111,8 @@ while ~JoyMainSwitch
         end
 
         % sensorer (bruk ikke Lys(k) og LysDirekte(k) samtidig)
-        Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+       % Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+       % Avstand(k) = double(readDistance(mySonicSensor));
 
         %{
         LysDirekte(k) = double(readLightIntensity(myColorSensor));
@@ -133,6 +134,7 @@ while ~JoyMainSwitch
         [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
         JoyMainSwitch = JoyButtons(1);
         JoyForover(k) = JoyAxes(2);
+        Avstand(k) = double(readDistance(mySonicSensor));
 
     else
         % online=false
@@ -158,16 +160,21 @@ while ~JoyMainSwitch
     % Kaller IKKE på en funksjon slik som i Python.
 
     % Parametre
-    b0=0.5;
+  
     %a=0.7;
-    Avstand(k) = Lys(k);
+        if k~=1
+      Smooth(k) = (1-alfa)*Smooth(k-1)+alfa*Lys(k);
+    else
+        Smooth(1) = Lys(1);
+    end
     % Tilordne målinger til variabler
-
+     %Avstand(k) = double(readDistance(mySonicSensor));
     % Spesifisering av initialverdier og beregninger
    % a1=5;
    % a2=-5;
     if k==1
-        AvstandIIR(1)=Avstand(k);
+        Avstand(1)=Lys(1);
+        AvstandIIR(1)=Smooth(k);
        % Nullflow = Lys(1)+2.84;
        % V(1) = 0.0;
         Ts(1) = 0.0;
@@ -175,19 +182,22 @@ while ~JoyMainSwitch
         FartIIR(1)=0;
        % Flow(1) = -Flowmean;% nominell verdi
     else
-        AvstandIIR(k)= b0*Avstand(k)+(1-b0)*(AvstandIIR(k-1));
+        Ts(k) = Tid(k) - Tid(k-1);
+        Avstand(k) = Lys(k);
+        AvstandIIR(k)= alfa*Avstand(k)+(1-alfa)*(AvstandIIR(k-1));
         Fart(k) = (Avstand(k)-Avstand(k-1))/Ts(k);
         FartIIR(k) = (AvstandIIR(k)-AvstandIIR(k-1))/Ts(k);
         %Flow(k)=a2;   
         %definer nominell initialverdi for Ts
         %Flow(k) = Lys(k)- Nullflow-Flowmean;
         %beregn Flow(k) som "Lys(k)-nullflow"
-        Ts(k) = Tid(k) - Tid(k-1);
+        
         %beregn tidsskrittet Ts(k)
        % V(k)= V(k-1)+Ts(k)*(Flo ...);
             %w(k-1));
         %V(k)=a2*Tid(k);
         %beregn Volum(k) vha Eulers forovermetode  % Beregninger av Ts og variable som avhenger av initialverdi
+   
     end
 
     % Andre beregninger som ikke avhenger av initialverdi
@@ -229,11 +239,7 @@ while ~JoyMainSwitch
     % aktiver fig1
     figure(fig1)
 
-    subplot(2,2,1)
-    plot(Tid(1:k),Lys(1:k));
-    title('Lys reflektert')
-    xlabel('Tid [sek]')
-
+   
     %subplot(2,2,2)
     %plot(Tid(1:k),Flow(1:k));
     %title('Flow')
@@ -254,25 +260,27 @@ while ~JoyMainSwitch
     title('FartIIR')
     xlabel('Tid [sek]')
 
-    subplot(2,2,4)
+    subplot(2,2,1)
     plot(Tid(1:k),Avstand(1:k));
-    plot(Tid(1:k),AvstandIIR(1:k))
+    hold on
+    plot(Tid(1:k),AvstandIIR(1:k));
+    hold off
     title('Avstand')
     xlabel('Tid [sek]')
     
     
-    if k~=1
-      Smooth(k) = (1-b0)*Smooth(k-1)+b0*Lys(k);
-    else
-        Smooth(1) = Lys(1);
-    end
+    %if k~=1
+     % Smooth(k) = (1-alfa)*Smooth(k-1)+alfa*Lys(k);
+   % else
+    %    Smooth(1) = Lys(1);
+    %end
    
    
 
-    subplot(2,2,4)
-    plot(Tid(1:k),Smooth(1:k));
-    title(['IIR Smooth with factor: ',num2str(b0,4)])
-    xlabel('Tid [sek]')
+    %subplot(2,2,4)
+    %plot(Tid(1:k),Smooth(1:k));
+    %title(['IIR Smooth with factor: ',num2str(alfa,4)])
+    %xlabel('Tid [sek]')
 
 
     %subplot(2,2,4)
