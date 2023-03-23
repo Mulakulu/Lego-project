@@ -21,9 +21,9 @@
 % Alltid lurt å rydde workspace opp først
 clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
-online = false;
+online = true;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'P00_MeasTest_1_RaskSinus.mat';
+filename = 'kjapp_sin.mat';
 % Definer variabler
 alfa = 0.2; %Hvor mye effekt ny data har på verdien i prosent
 Flowmean = 0.8670; %Beregnet mean(Flow)
@@ -111,7 +111,7 @@ while ~JoyMainSwitch
         end
 
         % sensorer (bruk ikke Lys(k) og LysDirekte(k) samtidig)
-       % Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+        Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
        % Avstand(k) = double(readDistance(mySonicSensor));
 
         %{
@@ -134,7 +134,7 @@ while ~JoyMainSwitch
         [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
         JoyMainSwitch = JoyButtons(1);
         JoyForover(k) = JoyAxes(2);
-        Avstand(k) = double(readDistance(mySonicSensor));
+      %  Avstand(k) = double(readDistance(mySonicSensor));
 
     else
         % online=false
@@ -187,6 +187,7 @@ while ~JoyMainSwitch
         AvstandIIR(k)= alfa*Avstand(k)+(1-alfa)*(AvstandIIR(k-1));
         Fart(k) = (Avstand(k)-Avstand(k-1))/Ts(k);
         FartIIR(k) = (AvstandIIR(k)-AvstandIIR(k-1))/Ts(k);
+
         %Flow(k)=a2;   
         %definer nominell initialverdi for Ts
         %Flow(k) = Lys(k)- Nullflow-Flowmean;
