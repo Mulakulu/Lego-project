@@ -23,7 +23,7 @@ clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = true;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'kjapp_sin.mat';
+filename = 'DerivasjonFAFB.mat';
 % Definer variabler
 alfa = 0.2; %Hvor mye effekt ny data har på verdien i prosent
 Flowmean = 0.8670; %Beregnet mean(Flow)
