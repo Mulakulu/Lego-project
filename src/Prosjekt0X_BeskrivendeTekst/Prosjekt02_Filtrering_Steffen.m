@@ -21,9 +21,9 @@
 % Alltid lurt å rydde workspace opp først
 clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
-online = true;
+online = false;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'Filtering_logging_1.mat';
+filename = 'treg_sin.mat';
 %--------------------------------------------------------------------------
 
 
@@ -113,7 +113,7 @@ JoyMainSwitch=0;
 k=1;
 
 while ~JoyMainSwitch
-    pause(0.5)
+    %pause(0.5)
     %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                       GET TIME AND MEASUREMENT
     % Få tid og målinger fra sensorer, motorer og joystick
@@ -272,7 +272,7 @@ while ~JoyMainSwitch
     
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                   FIR-filter
-    M=3; %Antall målinger
+    M=4; %Antall målinger
     %Temp_FIR(k) = Lys(k);
     if k == 1
         Temp_FIR(k) = Lys(k);
