@@ -84,17 +84,20 @@ disp('Equipment initialized.')
 %   2 = liear           (1*(k-2)+2*(k-1)+3*(k))/6  <-sum of alphas
 %   3 = exponent        (1*(k-2)+4*(k-1)+9*(k))/14 <-sum of alphas
 lookback = 10; %Definerer hvor mye FIR filtered ser tilbake
-spreadtype = 3;
+spreadtype = 4;
 switch spreadtype
     case 1
         alfas(1:lookback) = 1
-        alfaspread = "moving average"
+        alfaspread = "moving average";
     case 2
         alfas(1:lookback) = 1:lookback
-        alfaspread = "linear"
+        alfaspread = "lineær";
     case 3
         alfas(1:lookback) = power(1:lookback,2)
-        alfaspread = "exponential"
+        alfaspread = "kvadratisk";
+    case 4
+        alfas(1:lookback) = power(1:lookback,3)
+        alfaspread = "kubisk";
     otherwise
 end
 alfas(1:lookback) = alfas(1:lookback)/sum(alfas)
@@ -231,9 +234,6 @@ while ~JoyMainSwitch
     end
     %--------------------------------------------------------------
 
-    
-
-
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                  PLOT DATA
     % Denne seksjonen plasseres enten i while-lokka eller rett etterpå.
@@ -268,7 +268,6 @@ while ~JoyMainSwitch
     alfa = 0.6;
     if k ~= 1
         Temp_IIR(k) = (1-alfa) * Temp_IIR(k-1) + alfa * Flow(k);
-        
     else
         Temp_IIR(1) = Flow(1);
     end
