@@ -119,11 +119,20 @@ while ~JoyMainSwitch
 
         Avvik(k) = Lys(1) - Lys(k);
         
-        e(k)=abs(Avvik(k));
-        IAE(1)=0;
-        IAE(k)= IAE(k-1)+Ts(k)*e(k-1);
-        V(k)= V(k-1)+Ts(k)*(Flow(k-1));
+        %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        %                           IAE
+        if k == 1
+            IAE(1) = 0;
+            e(1) = 0;
+            Ts(1) = 0;
+        else
+            e(k) = abs(Avvik(k));
+            Ts(k) = Tid(k) - Tid(k-1);
+            IAE(k) = IAE(k-1) + (Ts(k)*e(k-1));
+        end
+        %------------------------------------------------------------------
 
+        
 
 %         LysDirekte(k) = double(readLightIntensity(myColorSensor));
 %         Bryter(k)  = double(readTouch(myTouchSensor));
@@ -193,6 +202,8 @@ while ~JoyMainSwitch
 %     PowerC(k) = ...
 %     PowerD(k) = ...
 
+  
+
     if online
         % Setter powerdata mot EV3
         % (slett de motorene du ikke bruker)
@@ -236,6 +247,18 @@ while ~JoyMainSwitch
 %             PowerB(k) = a*JoySide(k)*0.2 - 0.5*a*JoyForover(k);
 % 
 %         end
+k
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        %                           TV
+        if k == 1
+            PowerA(1) = 0;
+            PowerB(1) = 0;
+            TV_A(1) = 0;
+            TV_B(1) = 0;
+        else
+            TV_A(k) = TV_A(k-1) + abs(PowerA(k) - PowerA(k-1));
+            TV_B(k) = TV_B(k-1) + abs(PowerB(k) - PowerB(k-1));
+        end
 
         motorA.Speed = PowerA(k);
         motorB.Speed = PowerB(k);
@@ -287,14 +310,16 @@ while ~JoyMainSwitch
     xlabel('Tid [sek]')
 
     subplot(3,2,4)
-    plot(Tid(1:k), PowerB(1:k));
-    title('EIA')
+    plot(Tid(1:k), IAE(1:k));
+    title('IAE')
     xlabel('Tid [sek]')
 
-%     subplot(3,2,5)
-%     plot(Tid(1:k),PowerB(1:k));
-%     title('Power B')
-%     xlabel('Tid [sek]')
+     subplot(3,2,5)
+     plot(Tid(1:k), TV_A(1:k))
+     hold on
+     plot(Tid(1:k), TV_B(1:k))
+     title('TV')
+     xlabel('Tid [sek]')
 % 
 %     subplot(3,2,6)
 %     plot(Tid(1:k),PowerB(1:k));

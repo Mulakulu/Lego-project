@@ -170,13 +170,13 @@ while ~JoyMainSwitch
         Nullflow = Lys(1);
         V(1) = 7;
         Ts(1) = 0.0;
-        Flow(1) = -meanFlow; %Del 2
-        %Flow(1) = 0;% nominell verdi
+        %Flow(1) = -meanFlow; %Del 2
+        Flow(1) = 0;% nominell verdi
     else
         %Flow(k)=a2;   
         %definer nominell initialverdi for Ts
-        %Flow(k) = Lys(k)- Nullflow;
-        Flow(k) = Lys(k)- Nullflow - meanFlow; %Del 2
+        Flow(k) = Lys(k)- Nullflow;
+        %Flow(k) = Lys(k)- Nullflow - meanFlow; %Del 2
         %beregn Flow(k) som "Lys(k)-nullflow"
         Ts(k) = Tid(k) - Tid(k-1);
         %beregn tidsskrittet Ts(k)
