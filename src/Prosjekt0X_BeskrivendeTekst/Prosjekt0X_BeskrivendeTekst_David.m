@@ -1,21 +1,4 @@
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% Prosjekt0X_.....
-%
-% Hensikten med programmet er å ....
-% Følgende sensorer brukes:
-% - Lyssensor
-% - ...
-% - ...
-%
-% Følgende motorer brukes:
-% - motor A
-% - ...
-% - ...
-%
-%--------------------------------------------------------------------------
-
-
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                EXPERIMENT SETUP AND DATA FILENAME
 %
 % Alltid lurt å rydde workspace opp først
@@ -23,31 +6,40 @@ clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = false;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'P00_MeasTest_1_TregSinus.mat';
+filename = 'treg_sin.mat';
 % Definer variabler
 b0 = 0.5; %Hvor mye effekt ny data har på verdien i prosent
 Flowmean = 0.8670; %Beregnet mean(Flow)
-lookback = 5; %Definerer hvor mye FIR filtered ser tilbake
+lookback = 10; %Definerer hvor mye FIR filtered ser tilbake
 %--------------------------------------------------------------------------
+
 
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                DEFINE THE ALFAS OF THE FIR INPUTS
-%   1 = moving average  (1*(k-2)+1*(k-1)+1*(k))/3  <-sum of alphas
-%   2 = slope           (1*(k-2)+2*(k-1)+3*(k))/6  <-sum of alphas
-%   3 = exponent        (1*(k-2)+4*(k-1)+9*(k))/14 <-sum of alphas
-spreadtype = 2;
+%   1 = moving average  (1*(k-2)+1*(k-1)+1*(k))/3   <-sum of alphas
+%   2 = liear           (1*(k-2)+2*(k-1)+3*(k))/6   <-sum of alphas
+%   3 = qudratic        (1*(k-2)+4*(k-1)+9*(k))/14  <-sum of alphas
+%   4 = cubic           (1*(k-2)+8*(k-1)+27*(k))/36 <-sum of alphas
+spreadtype = 3;
 switch spreadtype
     case 1
-        alfas(1:lookback) = 1/sum(lookback)
+        alfas(1:lookback) = 1
+        alfaspread = "moving average";
     case 2
-        alfas(1:lookback) = (1:lookback)/sum(1:lookback)
+        alfas(1:lookback) = 1:lookback
+        alfaspread = "lineær";
     case 3
-        alfas(1:lookback) = (power(1:lookback,2))/sum(power(1:lookback,2))
+        alfas(1:lookback) = power(1:lookback,2)
+        alfaspread = "kvadratisk";
+    case 4
+        alfas(1:lookback) = power(1:lookback,3)
+        alfaspread = "kubisk";
     otherwise
 end
+alfas(1:lookback) = alfas(1:lookback)/sum(alfas)
 %--------------------------------------------------------------------------
 
-% +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+% +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                      INITIALIZE EQUIPMENT
 % Initialiser styrestikke, sensorer og motorer.
 %
@@ -94,10 +86,10 @@ else
 end
 
 disp('Equipment initialized.')
-%----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 
 
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                       SPECIFY FIGURE SIZE
 fig1=figure;
 screen = get(0,'Screensize');
@@ -105,7 +97,7 @@ set(fig1,'Position',[1,1,0.5*screen(3), 0.5*screen(4)])
 set(0,'defaultTextInterpreter','latex');
 set(0,'defaultAxesFontSize',14)
 set(0,'defaultTextFontSize',16)
-%----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 
 
 % setter skyteknapp til 0, og tellevariabel k=1
@@ -113,13 +105,9 @@ JoyMainSwitch=0;
 k=1;
 
 while ~JoyMainSwitch
-    %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    %                       GET TIME AND MEASUREMENT
-    % Få tid og målinger fra sensorer, motorer og joystick
-    %
-    % For ryddig og oversiktlig kode, kan det være lurt å slette
-    % de sensorene og motoren som ikke brukes.
 
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    %               GET TIME AND MEASUREMENT
     if online
         if k==1
             tic
@@ -161,54 +149,53 @@ while ~JoyMainSwitch
         end
 
         % simulerer EV3-Matlab kommunikasjon i online=false
-        pause(0.01)
+        pause(0.001)
 
     end
-    %--------------------------------------------------------------
-
-
-
+    %----------------------------------------------------------------------
+    
+    %++++++++++++++++++++++++++++
+    %       Generer sinus
+    %
+    
+    sinus1(k) = sin(k/10)
+    
+    %----------------------------
 
     % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    %             CONDITIONS, CALCULATIONS AND SET MOTOR POWER
-    % Gjør matematiske beregninger og motorkraftberegninger
-    % hvis motor er tilkoplet.
-    % Kaller IKKE på en funksjon slik som i Python.
-
-    % Parametre
-    a=0.7;
-
-    % Tilordne målinger til variabler
-
-
+    %               INTEGRATION ERROR (IAE)
     % Spesifisering av initialverdier og beregninger
-    a1=5;
-    a2=-5;
-    if k==1
-        Nullflow = Lys(1)+2.84;
-        V(1) = 0.0;
-        Ts(1) = 0.0;
-        Flow(1) = -Flowmean;% nominell verdi
+    meanError = 0; %Finn med mean(Flow)
+    if k~=1
+        error(k) = Lys(k)- NullError - meanError; %Measures current error
+        timeStep(k) = Tid(k) - Tid(k-1);
+        totalError(k)= totalError(k-1)+timeStep(k)*(abs(error(k-1)));
     else
-        %Flow(k)=a2;   
-        %definer nominell initialverdi for Ts
-        Flow(k) = Lys(k)- Nullflow-Flowmean;
-        %beregn Flow(k) som "Lys(k)-nullflow"
-        Ts(k) = Tid(k) - Tid(k-1);
-        %beregn tidsskrittet Ts(k)
-        V(k)= V(k-1)+Ts(k)*(Flow(k-1));
-        %V(k)=a2*Tid(k);
-        %beregn Volum(k) vha Eulers forovermetode  % Beregninger av Ts og variable som avhenger av initialverdi
+        NullError = Lys(1);
+        totalError(1) = 0;
+        timeStep(1) = 0.0;
+        error(1) = -meanError;
     end
+    %----------------------------------------------------------------------
+    
+    % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    %               SUMMED ERROR (MAE)
+    if k~=1
+        sumError(k) = sumError(k-1) + abs(error(k));
+        aproxError(k) = (sumError(k))/k;
+    else
+        sumError(1) = abs(error);
+        aproxError(1) = sumError(1);
+    end
+    %----------------------------------------------------------------------
 
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     % Andre beregninger som ikke avhenger av initialverdi
-
     % Pådragsberegninger
     %PowerA(k) = a*JoyForover(k);
     %PowerB(k) = ...
     %PowerC(k) = ...
     %PowerD(k) = ...
-
     if online
         % Setter powerdata mot EV3
         % (slett de motorene du ikke bruker)
@@ -222,13 +209,19 @@ while ~JoyMainSwitch
         %start(motorC)
         %start(motorD)
     end
-    %--------------------------------------------------------------
+    %----------------------------------------------------------------------
 
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    %               IIR FILTER
+    if k~=1
+        IIR(k) = (1-b0)*IIR(k-1)+b0*error(k);
+    else
+        IIR(1) = error(1);
+    end
+    %----------------------------------------------------------------------
 
-
-
-    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    %                  PLOT DATA
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    %               PLOT DATA
     % Denne seksjonen plasseres enten i while-lokka eller rett etterpå.
     % Dette kan enkelt gjøres ved flytte de 5 nederste linjene
     % før "end"-kommandoen nedenfor opp før denne seksjonen.
@@ -237,7 +230,7 @@ while ~JoyMainSwitch
     % gir samme opplevelse i online=0 og online=1 siden
     % hele datasettet (1:end) eksisterer i den lagrede .mat fila
 
-    % aktiver fig1
+    %aktiver fig1
     figure(fig1)
 
     subplot(2,2,1)
@@ -246,37 +239,25 @@ while ~JoyMainSwitch
     xlabel('Tid [sek]')
 
     subplot(2,2,2)
-    plot(Tid(1:k),Flow(1:k));
-    title('Flow')
+    plot(Tid(1:k),error(1:k));
+    title('Error')
     xlabel('Tid [sek]')
 
     subplot(2,2,3)
-    plot(Tid(1:k),V(1:k));
-    title('Volum')
+    plot(Tid(1:k),totalError(1:k));
+    title('Total Error')
     xlabel('Tid [sek]')
-    
-    if k~=1
-        IIR(k) = (1-b0)*IIR(k-1)+b0*Flow(k);
-    else
-        IIR(1) = Flow(1);
-    end
 
     subplot(2,2,4)
-    plot(Tid(1:k),IIR(1:k));
-    title(['IIR Smooth with factor: ',num2str(b0,4)])
+    plot(Tid(1:k),aproxError(1:k));
+    title("Aproximate Error")
     xlabel('Tid [sek]')
     
-    if k < lookback
-    end
 
-    %subplot(2,2,4)
-    %plot(Tid(1:k),PowerB(1:k));
-    %title('Power B')
-    %xlabel('Tid [sek]')
 
-    % tegn nå (viktig kommando)
+    %tegn nå (viktig kommando)
     drawnow
-    %--------------------------------------------------------------
+    %----------------------------------------------------------------------
 
     % For å flytte PLOT DATA etter while-lokken, er det enklest å
     % flytte de neste 5 linjene (til og med "end") over PLOT DATA.
@@ -286,7 +267,7 @@ while ~JoyMainSwitch
     k=k+1;
 
 end
-% +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+% +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %               STOP MOTORS
 
 if online
@@ -300,8 +281,8 @@ if online
 end
 
 
-%------------------------------------------------------------------
-while not skyteknapp
+%--------------------------------------------------------------------------
+%while ~skyteknapp
 % GET TIME AND MEASUREMENT
 
 % CONDITIONS, CALCULATIONS AND SET MOTOR POWER
@@ -311,7 +292,7 @@ while not skyteknapp
 % PLOT DATA
 %plot Flow i øverste subplot
 %plot Volum i nederste subplot
-end
+%end
 
 
 
