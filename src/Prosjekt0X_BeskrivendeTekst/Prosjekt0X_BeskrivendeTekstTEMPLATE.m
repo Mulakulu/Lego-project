@@ -21,12 +21,9 @@
 % Alltid lurt å rydde workspace opp først
 clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
-online = false;
+online = true;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'DerivasjonChirp.mat';
-% Definer variabler
-alfa = 0.2; %Hvor mye effekt ny data har på verdien i prosent
-Flowmean = 0.8670; %Beregnet mean(Flow)
+filename = 'P0X_MeasBeskrivendeTekst_Y.mat';
 %--------------------------------------------------------------------------
 
 
@@ -41,6 +38,7 @@ Flowmean = 0.8670; %Beregnet mean(Flow)
 % Eksempel:
 % mySonicSensor_1 = sonicSensor(mylego,3);
 % mySonicSensor_2 = sonicSensor(mylego,4);
+
 % For ryddig og oversiktlig kode, kan det være lurt å slette
 % de sensorene og motoren som ikke brukes. 
 
@@ -102,6 +100,7 @@ while ~JoyMainSwitch
     %
     % For ryddig og oversiktlig kode, kan det være lurt å slette
     % de sensorene og motoren som ikke brukes.
+
     if online
         if k==1
             tic
@@ -112,7 +111,6 @@ while ~JoyMainSwitch
 
         % sensorer (bruk ikke Lys(k) og LysDirekte(k) samtidig)
         Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
-       % Avstand(k) = double(readDistance(mySonicSensor));
 
         %{
         LysDirekte(k) = double(readLightIntensity(myColorSensor));
@@ -134,7 +132,6 @@ while ~JoyMainSwitch
         [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
         JoyMainSwitch = JoyButtons(1);
         JoyForover(k) = JoyAxes(2);
-      %  Avstand(k) = double(readDistance(mySonicSensor));
 
     else
         % online=false
@@ -160,67 +157,39 @@ while ~JoyMainSwitch
     % Kaller IKKE på en funksjon slik som i Python.
 
     % Parametre
-  
-    %a=0.7;
-        if k~=1
-      Smooth(k) = (1-alfa)*Smooth(k-1)+alfa*Lys(k);
-    else
-        Smooth(1) = Lys(1);
-    end
-    % Tilordne målinger til variabler
-     %Avstand(k) = double(readDistance(mySonicSensor));
-    % Spesifisering av initialverdier og beregninger
-   % a1=5;
-   % a2=-5;
-    if k==1
-        Avstand(1)=Lys(1);
-        AvstandIIR(1)=Smooth(k);
-       % Nullflow = Lys(1)+2.84;
-       % V(1) = 0.0;
-        Ts(1) = 0.0;
-        Fart(1)=0;
-        FartIIR(1)=0;
-       % Flow(1) = -Flowmean;% nominell verdi
-    else
-        Ts(k) = Tid(k) - Tid(k-1);
-        Avstand(k) = Lys(k);
-        AvstandIIR(k)= alfa*Avstand(k)+(1-alfa)*(AvstandIIR(k-1));
-        Fart(k) = (Avstand(k)-Avstand(k-1))/Ts(k);
-        FartIIR(k) = (AvstandIIR(k)-AvstandIIR(k-1))/Ts(k);
+    a=0.7;
 
-        %Flow(k)=a2;   
-        %definer nominell initialverdi for Ts
-        %Flow(k) = Lys(k)- Nullflow-Flowmean;
-        %beregn Flow(k) som "Lys(k)-nullflow"
-        
-        %beregn tidsskrittet Ts(k)
-       % V(k)= V(k-1)+Ts(k)*(Flo ...);
-            %w(k-1));
-        %V(k)=a2*Tid(k);
-        %beregn Volum(k) vha Eulers forovermetode  % Beregninger av Ts og variable som avhenger av initialverdi
-   
+    % Tilordne målinger til variabler
+
+
+    % Spesifisering av initialverdier og beregninger
+    if k==1
+        % Initialverdier
+        Ts(1) = 0.01;  % nominell verdi
+    else
+        % Beregninger av Ts og variable som avhenger av initialverdi
     end
 
     % Andre beregninger som ikke avhenger av initialverdi
 
     % Pådragsberegninger
-    %PowerA(k) = a*JoyForover(k);
-    %PowerB(k) = ...
-    %PowerC(k) = ...
-    %PowerD(k) = ...
+    PowerA(k) = a*JoyForover(k);
+    PowerB(k) = ...
+    PowerC(k) = ...
+    PowerD(k) = ...
 
     if online
         % Setter powerdata mot EV3
         % (slett de motorene du ikke bruker)
-        %motorA.Speed = PowerA(k);
-        %motorB.Speed = PowerB(k);
-        %motorC.Speed = PowerC(k);
-        %motorD.Speed = PowerD(k);
+        motorA.Speed = PowerA(k);
+        motorB.Speed = PowerB(k);
+        motorC.Speed = PowerC(k);
+        motorD.Speed = PowerD(k);
 
-        %start(motorA)
-        %start(motorB)
-        %start(motorC)
-        %start(motorD)
+        start(motorA)
+        start(motorB)
+        start(motorC)
+        start(motorD)
     end
     %--------------------------------------------------------------
 
@@ -240,54 +209,25 @@ while ~JoyMainSwitch
     % aktiver fig1
     figure(fig1)
 
-   
-    %subplot(2,2,2)
-    %plot(Tid(1:k),Flow(1:k));
-    %title('Flow')
-    %xlabel('Tid [sek]')
-
-   % subplot(2,2,3)
-   % plot(Tid(1:k),V(1:k));
-   % title('Volum')
-   % xlabel('Tid [sek]')
+    subplot(2,2,1)
+    plot(Tid(1:k),Lys(1:k));
+    title('Lys reflektert')
+    xlabel('Tid [sek]')
 
     subplot(2,2,2)
-    plot(Tid(1:k),Fart(1:k));
-    title('Fart')
+    plot(Tid(1:k),Avstand(1:k));
+    title('Avstand')
     xlabel('Tid [sek]')
 
     subplot(2,2,3)
-    plot(Tid(1:k),FartIIR(1:k));
-    title('FartIIR')
+    plot(Tid(1:k),VinkelPosMotorB(1:k));
+    title('Vinkelposisjon motor B')
     xlabel('Tid [sek]')
 
-    subplot(2,2,1)
-    plot(Tid(1:k),Avstand(1:k));
-    hold on
-    plot(Tid(1:k),AvstandIIR(1:k));
-    hold off
-    title('Avstand')
+    subplot(2,2,4)
+    plot(Tid(1:k),PowerB(1:k));
+    title('Power B')
     xlabel('Tid [sek]')
-    
-    
-    %if k~=1
-     % Smooth(k) = (1-alfa)*Smooth(k-1)+alfa*Lys(k);
-   % else
-    %    Smooth(1) = Lys(1);
-    %end
-   
-   
-
-    %subplot(2,2,4)
-    %plot(Tid(1:k),Smooth(1:k));
-    %title(['IIR Smooth with factor: ',num2str(alfa,4)])
-    %xlabel('Tid [sek]')
-
-
-    %subplot(2,2,4)
-    %plot(Tid(1:k),PowerB(1:k));
-    %title('Power B')
-    %xlabel('Tid [sek]')
 
     % tegn nå (viktig kommando)
     drawnow
@@ -307,14 +247,12 @@ end
 if online
     % For ryddig og oversiktlig kode, kan det være lurt å slette
     % de sensorene og motoren som ikke brukes.
-    %stop(motorA);
-    %stop(motorB);
-    %stop(motorC);
-    %stop(motorD);
+    stop(motorA);
+    stop(motorB);
+    stop(motorC);
+    stop(motorD);
 
 end
-
-
 %------------------------------------------------------------------
 
 
