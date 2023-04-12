@@ -42,6 +42,7 @@ filename = 'P0X_MeasBeskrivendeTekst_Y.mat';
 % For ryddig og oversiktlig kode, kan det være lurt å slette
 % de sensorene og motoren som ikke brukes. 
 
+
 if online
     
     % LEGO EV3 og styrestikke
@@ -104,15 +105,26 @@ while ~JoyMainSwitch
     if online
         if k==1
             tic
-            Tid(1) = 0;
+            Tid(1) = 0
         else
             Tid(k) = toc;
         end
 
+
+
         % sensorer (bruk ikke Lys(k) og LysDirekte(k) samtidig)
         Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
 
+        Refrence(k) = Lys(1);
+
+        Avvik(k) = Lys(1) - Lys(k);
         
+        e(k)=abs(Avvik(k));
+        IAE(1)=0;
+        IAE(k)= IAE(k-1)+Ts(k)*e(k-1);
+        V(k)= V(k-1)+Ts(k)*(Flow(k-1));
+
+
 %         LysDirekte(k) = double(readLightIntensity(myColorSensor));
 %         Bryter(k)  = double(readTouch(myTouchSensor));
 %         Avstand(k) = double(readDistance(mySonicSensor));
@@ -185,21 +197,25 @@ while ~JoyMainSwitch
         % Setter powerdata mot EV3
         % (slett de motorene du ikke bruker)
 
-        if JoySide(k) < 0 && JoyForover(k) > 0
-            PowerA(k) = a*JoySide(k)*0 + 0.5*a*JoyForover(k);
-            PowerB(k) = a*JoySide(k)*-1 + 0.5*a*JoyForover(k);
-
-        elseif JoySide(k) > 0 && JoyForover(k) > 0
-            PowerA(k) = a*JoySide(k)*1 + 0.5*a*JoyForover(k);
-            PowerB(k) = a*JoySide(k)*0 + 0.5*a*JoyForover(k);
-        
-        elseif JoySide(k) < 0 && JoyForover(k) < 0
-            PowerA(k) = a*JoySide(k)*0 + 0.5*a*JoyForover(k);
-            PowerB(k) = a*JoySide(k)*1 + 0.5*a*JoyForover(k);
-
-        elseif JoySide(k) > 0 && JoyForover(k) < 0
-            PowerA(k) = a*JoySide(k)*-1 + 0.5*a*JoyForover(k);
-            PowerB(k) = a*JoySide(k)*0 + 0.5*a*JoyForover(k);
+       if Lys(k) > 60
+            break
+       else
+            if JoySide(k) < 0 && JoyForover(k) > 0
+                PowerA(k) = a*JoySide(k)*0 + 0.5*a*JoyForover(k);
+                PowerB(k) = a*JoySide(k)*-1 + 0.5*a*JoyForover(k);
+    
+            elseif JoySide(k) > 0 && JoyForover(k) > 0
+                PowerA(k) = a*JoySide(k)*1 + 0.5*a*JoyForover(k);
+                PowerB(k) = a*JoySide(k)*0 + 0.5*a*JoyForover(k);
+            
+            elseif JoySide(k) < 0 && JoyForover(k) < 0
+                PowerA(k) = a*JoySide(k)*0 + 0.5*a*JoyForover(k);
+                PowerB(k) = a*JoySide(k)*1 + 0.5*a*JoyForover(k);
+    
+            elseif JoySide(k) > 0 && JoyForover(k) < 0
+                PowerA(k) = a*JoySide(k)*-1 + 0.5*a*JoyForover(k);
+                PowerB(k) = a*JoySide(k)*0 + 0.5*a*JoyForover(k);
+            end
 
         end
 
@@ -249,25 +265,41 @@ while ~JoyMainSwitch
     % aktiver fig1
     figure(fig1)
 
-    subplot(2,2,1)
-    plot(Tid(1:k),Lys(1:k));
+    subplot(3,2,1)
+    plot(Tid(1:k), Lys(1:k))
+    hold on
+    plot(Tid(1:k), Refrence(1:k))
+    hold off
     title('Lys reflektert')
     xlabel('Tid [sek]')
 
-%     subplot(2,2,2)
-%     plot(Tid(1:k),Avstand(1:k));
-%     title('Avstand')
+    subplot(3,2,2)
+    plot(Tid(1:k), Avvik(1:k))
+    title('Avvik')
+    xlabel('Tid [sek]')
+
+    subplot(3,2,3)
+    plot(Tid(1:k), PowerA(1:k))
+    hold on
+    plot(Tid(1:k), PowerB(1:k))
+    hold off
+    title('PowerA og PowerB')
+    xlabel('Tid [sek]')
+
+    subplot(3,2,4)
+    plot(Tid(1:k), PowerB(1:k));
+    title('EIA')
+    xlabel('Tid [sek]')
+
+%     subplot(3,2,5)
+%     plot(Tid(1:k),PowerB(1:k));
+%     title('Power B')
 %     xlabel('Tid [sek]')
-
-    subplot(2,2,3)
-    plot(Tid(1:k),VinkelPosMotorB(1:k));
-    title('Vinkelposisjon motor B')
-    xlabel('Tid [sek]')
-
-    subplot(2,2,4)
-    plot(Tid(1:k),PowerB(1:k));
-    title('Power B')
-    xlabel('Tid [sek]')
+% 
+%     subplot(3,2,6)
+%     plot(Tid(1:k),PowerB(1:k));
+%     title('Power B')
+%     xlabel('Tid [sek]')
 
     % tegn nå (viktig kommando)
     drawnow
