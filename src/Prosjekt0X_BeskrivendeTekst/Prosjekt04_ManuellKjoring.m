@@ -131,8 +131,14 @@ while ~JoyMainSwitch
             IAE(k) = IAE(k-1) + (Ts(k)*e(k-1));
         end
         %------------------------------------------------------------------
-
-        
+        %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        %                           MAE
+        if K == 1
+            MAE(k) = e(k);
+        else
+            MAE(k) = MAE(k-1) + ((1/k).*e(k));
+        end
+        %------------------------------------------------------------------
 
 %         LysDirekte(k) = double(readLightIntensity(myColorSensor));
 %         Bryter(k)  = double(readTouch(myTouchSensor));
@@ -247,9 +253,9 @@ while ~JoyMainSwitch
 %             PowerB(k) = a*JoySide(k)*0.2 - 0.5*a*JoyForover(k);
 % 
 %         end
-k
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        %                           TV
+
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    %                               TV
         if k == 1
             PowerA(1) = 0;
             PowerB(1) = 0;
@@ -259,6 +265,7 @@ k
             TV_A(k) = TV_A(k-1) + abs(PowerA(k) - PowerA(k-1));
             TV_B(k) = TV_B(k-1) + abs(PowerB(k) - PowerB(k-1));
         end
+    %------------------------------------------------------------------
 
         motorA.Speed = PowerA(k);
         motorB.Speed = PowerB(k);
