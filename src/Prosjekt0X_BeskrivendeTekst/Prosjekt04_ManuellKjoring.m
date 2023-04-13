@@ -133,10 +133,11 @@ while ~JoyMainSwitch
         %------------------------------------------------------------------
         %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         %                           MAE
-        if K == 1
+        if k == 1
             MAE(k) = e(k);
         else
-            MAE(k) = MAE(k-1) + ((1/k).*e(k));
+            %MAE(k) = (MAE(k-1) + e(k))./2;
+            MAE(k) = (1/k)*sum(e);
         end
         %------------------------------------------------------------------
 
@@ -236,6 +237,12 @@ while ~JoyMainSwitch
 
         end
 
+
+        Middelverdi = mean(Lys);
+        Standardavvik = std(Lys);
+        Middelverdi_Ts = mean(Ts);
+        Middelverdi_Tid = mean(Tid);
+        
 %         if JoySide(k) < 0 && JoyForover(k) > 0
 %             PowerA(k) = a*JoySide(k)*0.2 - 0.5*a*JoyForover(k);
 %             PowerB(k) = a*JoySide(k)*-1 + 0.5*a*JoyForover(k);
@@ -327,11 +334,11 @@ while ~JoyMainSwitch
      plot(Tid(1:k), TV_B(1:k))
      title('TV')
      xlabel('Tid [sek]')
-% 
-%     subplot(3,2,6)
-%     plot(Tid(1:k),PowerB(1:k));
-%     title('Power B')
-%     xlabel('Tid [sek]')
+ 
+     subplot(3,2,6)
+     plot(Tid(1:k), MAE(1:k));
+     title('MAE')
+     xlabel('Tid [sek]')
 
     % tegn nå (viktig kommando)
     drawnow
