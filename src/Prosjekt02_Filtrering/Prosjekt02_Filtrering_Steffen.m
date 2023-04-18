@@ -11,7 +11,7 @@
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %                EXPERIMENT SETUP AND DATA FILENAME
 clear; close all
-online = true;
+online = false;
 filename = 'treg_sin.mat';
 %--------------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ k=1;
 
 while ~JoyMainSwitch
     
-    pause(0.5)
+%     pause(0.5)
 
     %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                       GET TIME AND MEASUREMENT
