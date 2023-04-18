@@ -14,7 +14,7 @@ clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = false;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'treg_sin.mat';
+filename = 'P02_Stoy.mat';
 %--------------------------------------------------------------------------
 
 
@@ -122,12 +122,15 @@ while ~JoyMainSwitch
     
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                   FIR-filter
-    M=4; %Antall målinger
-    %Temp_FIR(k) = Lys(k);
+
+    % 3 variabler for froskjellig antall målinger
+    M1 = 3;
+    M2 = 6;
+    M3 = 9;
+
     if k == 1
         Temp_FIR(k) = Lys(k);
     end
-
 
     if k < M1
         M1 = k;
@@ -148,114 +151,119 @@ while ~JoyMainSwitch
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                  PLOT KAFFE
 
-    subplot(1,2,1)
-    plot(Tid(1:k),Temp(1:k), "b-"); hold on
-    plot(Tid(1:k),Temp_IIR_a1(1:k), "r-"); hold on
-    plot(Tid(1:k),Temp_IIR_a2(1:k), 'Color', "#FF00FF"); hold on
-    plot(Tid(1:k),Temp_IIR_a3(1:k), "g-");
-    title(['IIR-variabler:'...
-         , ' \color{red}\alpha_1 ', num2str(alfa1, '%3.2f')...
-         , ', \color{magenta}\alpha_2 ', num2str(alfa2, '%3.2f')...
-         , ', \color{green}\alpha_3 ', num2str(alfa3, '%3.2f')]...
-         , 'Interpreter', 'tex', FontName='CMU Serif')
-    xlabel('Tid')
-    xtickformat('%g s')
-    ylabel('Kaffetemp.')
-    ytickformat('%g °C')
-
-    subplot(1,2,2)
-    plot(Tid(1:k),Temp(1:k), "b-"); hold on
-    plot(Tid(1:k),Temp_FIR_M1(1:k), "r-");
-    plot(Tid(1:k),Temp_FIR_M2(1:k), 'Color', "#FF00FF");
-    plot(Tid(1:k),Temp_FIR_M3(1:k), "g-");
-    title(['FIR-variabler:'...
-         , ' \color{red}M_1 ', num2str(M1, '%3.2f')...
-         , ', \color{magenta}M_2 ', num2str(M2, '%3.2f')...
-         , ', \color{green}M_3 ', num2str(M3, '%3.2f')]...
-         , 'Interpreter', 'tex', FontName='CMU Serif')
-    xlabel('Tid')
-    xtickformat('%g s')
-    ylabel('Kaffetemp.')
-    ytickformat('%g °C')
-
-    drawnow
-
-    movegui("center")
+%     subplot(1,2,1)
+%     plot(Tid(1:k),Temp(1:k), "b-"); hold on
+%     plot(Tid(1:k),Temp_IIR_a1(1:k), "r-"); hold on
+%     plot(Tid(1:k),Temp_IIR_a2(1:k), 'Color', "#FF00FF"); hold on
+%     plot(Tid(1:k),Temp_IIR_a3(1:k), "g-");
+%     title(['IIR-variabler:'...
+%          , ' \color{red}\alpha_1=', num2str(alfa1, '%1.1f')...
+%          , ', \color{magenta}\alpha_2=', num2str(alfa2, '%1.1f')...
+%          , ', \color{green}\alpha_3=', num2str(alfa3, '%1.1f')]...
+%          , 'Interpreter', 'tex', FontName='CMU Serif')
+%     xlabel('Tid')
+%     xtickformat('%g s')
+%     ylabel('Kaffetemp.')
+%     ytickformat('%g °C')
+% 
+%     subplot(1,2,2)
+%     plot(Tid(1:k),Temp(1:k), "b-"); hold on
+%     plot(Tid(1:k),Temp_FIR_M1(1:k), "r-");
+%     plot(Tid(1:k),Temp_FIR_M2(1:k), 'Color', "#FF00FF");
+%     plot(Tid(1:k),Temp_FIR_M3(1:k), "g-");
+%     title(['FIR-variabler:'...
+%          , ' \color{red}M_1=', num2str(M1, '%1.0f')...
+%          , ', \color{magenta}M_2=', num2str(M2, '%1.0f')...
+%          , ', \color{green}M_3=', num2str(M3, '%1.0f')]...
+%          , 'Interpreter', 'tex', FontName='CMU Serif')
+%     xlabel('Tid')
+%     xtickformat('%g s')
+%     ylabel('Kaffetemp.')
+%     ytickformat('%g °C')
+% 
+%     drawnow
+% 
+%     movegui("center")
     %----------------------------------------------------------------------
 
 
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     %                  PLOT STOY
 
-%     subplot(2,3,1)
+    % IIR
+
+%     subplot(1,3,1)
 %     plot(Tid(1:k),Temp(1:k), "b-"); hold on
 %     plot(Tid(1:k),Temp_IIR_a1(1:k), "r-");
 %     title(['IIR-variabler:'...
-%          , ' \color{red}\alpha_1 ', num2str(alfa1, '%3.2f')]...
+%          , ' \color{red}\alpha_1=', num2str(alfa1, '%1.1f')]...
 %          , 'Interpreter', 'tex', FontName='CMU Serif')
 %     xlabel('Tid')
 %     xtickformat('%g s')
 %     ylabel('Temp.')
 %     ytickformat('%g °C')
 % 
-%     subplot(2,3,2)
+%     subplot(1,3,2)
 %     plot(Tid(1:k),Temp(1:k), "b-"); hold on
 %     plot(Tid(1:k),Temp_IIR_a2(1:k), 'Color', "#FF00FF");
 %     title(['IIR-variabler:'...
-%          , ', \color{magenta}\alpha_2 ', num2str(alfa2, '%3.2f')]...
+%          , ', \color{magenta}\alpha_2=', num2str(alfa2, '%1.1f')]...
 %          , 'Interpreter', 'tex', FontName='CMU Serif')
 %     xlabel('Tid')
 %     xtickformat('%g s')
 %     ylabel('Temp.')
 %     ytickformat('%g °C')
 % 
-%     subplot(2,3,3)
+%     subplot(1,3,3)
 %     plot(Tid(1:k),Temp(1:k), "b-"); hold on
 %     plot(Tid(1:k),Temp_IIR_a3(1:k), "g-");
 %     title(['IIR-variabler:'...
-%          , ', \color{green}\alpha_3 ', num2str(alfa3, '%3.2f')]...
+%          , ', \color{green}\alpha_3=', num2str(alfa3, '%1.1f')]...
 %          , 'Interpreter', 'tex', FontName='CMU Serif')
 %     xlabel('Tid')
 %     xtickformat('%g s')
 %     ylabel('Temp.')
 %     ytickformat('%g °C')
-% 
-%     subplot(2,3,4)
-%     plot(Tid(1:k),Temp(1:k), "b-"); hold on
-%     plot(Tid(1:k),Temp_FIR_M1(1:k), "r-");
-%     title(['FIR-variabler:'...
-%          , ' \color{red}M_1 ', num2str(M1, '%3.2f')]...
-%          , 'Interpreter', 'tex', FontName='CMU Serif')
-%     xlabel('Tid')
-%     xtickformat('%g s')
-%     ylabel('Temp.')
-%     ytickformat('%g °C')
-% 
-%     subplot(2,3,5)
-%     plot(Tid(1:k),Temp(1:k), "b-"); hold on
-%     plot(Tid(1:k),Temp_FIR_M2(1:k), 'Color', "#FF00FF");
-%     title(['FIR-variabler:'...
-%          , ', \color{magenta}M_2 ', num2str(M2, '%3.2f')]...
-%          , 'Interpreter', 'tex', FontName='CMU Serif')
-%     xlabel('Tid')
-%     xtickformat('%g s')
-%     ylabel('Temp.')
-%     ytickformat('%g °C')
-% 
-%     subplot(2,3,6)
-%     plot(Tid(1:k),Temp(1:k), "b-"); hold on
-%     plot(Tid(1:k),Temp_FIR_M3(1:k), "g-");
-%     title(['FIR-variabler:'...
-%          , ', \color{green}M_3 ', num2str(M3, '%3.2f')]...
-%          , 'Interpreter', 'tex', FontName='CMU Serif')
-%     xlabel('Tid')
-%     xtickformat('%g s')
-%     ylabel('Temp.')
-%     ytickformat('%g °C')
-% 
-%     drawnow
-% 
-%     movegui("center")
+
+
+    % FIR
+
+    subplot(1,3,1)
+    plot(Tid(1:k),Temp(1:k), "b-"); hold on
+    plot(Tid(1:k),Temp_FIR_M1(1:k), "r-");
+    title(['FIR-variabler:'...
+         , ' \color{red}M_1=', num2str(M1, '%1.0f')]...
+         , 'Interpreter', 'tex', FontName='CMU Serif')
+    xlabel('Tid')
+    xtickformat('%g s')
+    ylabel('Temp.')
+    ytickformat('%g °C')
+
+    subplot(1,3,2)
+    plot(Tid(1:k),Temp(1:k), "b-"); hold on
+    plot(Tid(1:k),Temp_FIR_M2(1:k), 'Color', "#FF00FF");
+    title(['FIR-variabler:'...
+         , ', \color{magenta}M_2=', num2str(M2, '%1.0f')]...
+         , 'Interpreter', 'tex', FontName='CMU Serif')
+    xlabel('Tid')
+    xtickformat('%g s')
+    ylabel('Temp.')
+    ytickformat('%g °C')
+
+    subplot(1,3,3)
+    plot(Tid(1:k),Temp(1:k), "b-"); hold on
+    plot(Tid(1:k),Temp_FIR_M3(1:k), "g-");
+    title(['FIR-variabler:'...
+         , ', \color{green}M_3=', num2str(M3, '%1.0f')]...
+         , 'Interpreter', 'tex', FontName='CMU Serif')
+    xlabel('Tid')
+    xtickformat('%g s')
+    ylabel('Temp.')
+    ytickformat('%g °C')
+
+    drawnow
+
+    movegui("center")
     %----------------------------------------------------------------------
 
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
