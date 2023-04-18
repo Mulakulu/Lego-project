@@ -115,9 +115,12 @@ while ~JoyMainSwitch
         % sensorer (bruk ikke Lys(k) og LysDirekte(k) samtidig)
         Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
 
+        %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        %                   Referance & Error
         Refrence(k) = Lys(1);
 
         Avvik(k) = Lys(1) - Lys(k);
+        %------------------------------------------------------------------
         
         %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         %                           IAE
@@ -131,6 +134,7 @@ while ~JoyMainSwitch
             IAE(k) = IAE(k-1) + (Ts(k)*e(k-1));
         end
         %------------------------------------------------------------------
+
         %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         %                           MAE
         if k == 1
@@ -215,6 +219,8 @@ while ~JoyMainSwitch
         % Setter powerdata mot EV3
         % (slett de motorene du ikke bruker)
 
+    %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    %                   Manual driving
        if Lys(k) > 60
             break
        else
@@ -236,7 +242,7 @@ while ~JoyMainSwitch
             end
 
         end
-
+    %------------------------------------------------------------------
 
         Middelverdi = mean(Lys);
         Standardavvik = std(Lys);
@@ -340,6 +346,9 @@ while ~JoyMainSwitch
      title('MAE')
      xlabel('Tid [sek]')
 
+
+    
+     
     % tegn nå (viktig kommando)
     drawnow
     %--------------------------------------------------------------
@@ -351,6 +360,9 @@ while ~JoyMainSwitch
     % Oppdaterer tellevariabel
     k=k+1;
 end
+
+figure;
+histogram(Lys);
 
 % +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %               STOP MOTORS
