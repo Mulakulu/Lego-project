@@ -94,7 +94,7 @@ for period = max_period:-period_step:2
             for o = 1:1:time
                 cycles = cycles + period;
                 if cycles > found_peak
-                    delta = prev_cycle - found_peak;
+                    delta = (found_peak - prev_cycle)/period;
                     break
                 end
                 prev_cycle = cycles;
@@ -108,7 +108,7 @@ for period = max_period:-period_step:2
         end
         %result = max(result_estimate);
         %result = round(max_result*20+0.5)/20;
-        result = mod(1+delta/(2*pi),1);
+        result = delta;
         if result < 1/6
             r = 1; g = 6*result; b = 0;
         elseif result < 2/6
