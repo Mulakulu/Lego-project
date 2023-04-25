@@ -1,6 +1,6 @@
 clear
 close all
-load("../Prosjekt0X_BeskrivendeTekst/perfect_funcs/HDchirp.mat")
+load("../perfect_funcs/HDchirp.mat")
 time = 10000;
 IIR_freq = ones(1,time);
 k=0;

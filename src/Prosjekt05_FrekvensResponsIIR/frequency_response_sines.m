@@ -5,11 +5,11 @@ figure(figure)
 for t=1:5
     k=0;
     switch t
-        case 1; sine = load("perfect_funcs\sinT22.mat");
-        case 2; sine = load("perfect_funcs\sinT14.mat");
-        case 3; sine = load("perfect_funcs\sinT10.mat");
-        case 4; sine = load("perfect_funcs\sinT6.mat");
-        case 5; sine = load("perfect_funcs\sinT4.mat");
+        case 1; sine = load("..\perfect_funcs\sinT22.mat");
+        case 2; sine = load("..\perfect_funcs\sinT14.mat");
+        case 3; sine = load("..\perfect_funcs\sinT10.mat");
+        case 4; sine = load("..\perfect_funcs\sinT6.mat");
+        case 5; sine = load("..\perfect_funcs\sinT4.mat");
     end
     fields = fieldnames(sine);      %find name of array variable
     arrayValues = sine.(fields{1}); %extract array out of struct
