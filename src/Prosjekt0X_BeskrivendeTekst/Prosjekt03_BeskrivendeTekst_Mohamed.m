@@ -23,9 +23,9 @@ clear; close all
 % Skal prosjektet gjennomføres online mot EV3 eller mot lagrede data?
 online = false;
 % Spesifiser et beskrivende filnavn for lagring av måledata
-filename = 'P00_MeasTest_1_RaskSinus.mat';
+filename = ['DerChirp.mat'];
 % Definer variabler
-alfa = 0.2; %Hvor mye effekt ny data har på verdien i prosent
+alfa = 0.4; %Hvor mye effekt ny data har på verdien i prosent
 Flowmean = 0.8670; %Beregnet mean(Flow)
 %--------------------------------------------------------------------------
 
@@ -53,7 +53,7 @@ if online
 
     % sensorer
     myColorSensor = colorSensor(mylego);
-    
+    %mySonicSensor = sonicSensor(mylego);
     %{
     myTouchSensor = touchSensor(mylego);
     mySonicSensor = sonicSensor(mylego);
@@ -111,7 +111,7 @@ while ~JoyMainSwitch
         end
 
         % sensorer (bruk ikke Lys(k) og LysDirekte(k) samtidig)
-       % Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
+        Lys(k) = double(readLightIntensity(myColorSensor,'reflected'));
        % Avstand(k) = double(readDistance(mySonicSensor));
 
         %{
@@ -134,7 +134,7 @@ while ~JoyMainSwitch
         [JoyAxes,JoyButtons] = HentJoystickVerdier(joystick);
         JoyMainSwitch = JoyButtons(1);
         JoyForover(k) = JoyAxes(2);
-        Avstand(k) = double(readDistance(mySonicSensor));
+        %Avstand(k) = double(readDistance(myColorSensor));
 
     else
         % online=false
