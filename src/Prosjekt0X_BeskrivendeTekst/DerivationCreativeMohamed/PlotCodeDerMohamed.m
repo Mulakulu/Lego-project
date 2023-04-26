@@ -31,11 +31,29 @@ while k<7462
     else
         v(k)=0;
     end
-
+    Ts= Tid(k)-Tid(k-1);
+    a=Secant(v(k)-v(k-1))/Ts;
     k=k+1;
 
 end
 
-         
- plot(Tid(1:k-1),v(1:k-1))
+  subplot(1,1,1)
+    plot(Tid(1:k-1),v(1:k-1));
+    title('Velocity')
+    xlabel('Time [sek]')
+
+ 
+ 
+    %plot(Tid(1:k-1),v(1:k-1))
+ %--------------------------------------------------------------------
+
+%Derivation function
+function[Secant]=Derivation_tom(FunctionValues,TimeStep)
+ Secant= (FunctionValues(2)-FunctionValues(1))/TimeStep;
+ end
+
+
+
+
+
        
